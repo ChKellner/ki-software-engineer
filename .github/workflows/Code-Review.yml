@@ -10,8 +10,8 @@ on:
     #   - "src/**/*.js"
     #   - "src/**/*.jsx"
 
-jobs:  
-    OpenAI-Review:
+jobs:
+  OpenAI-Review:
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     permissions:
@@ -25,7 +25,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 1
-          
+
       - name: Configure Codex GitHub API access
         env:
           CODEX_CI_HOME: ${{ runner.temp }}/codex-Code-Review
@@ -34,13 +34,13 @@ jobs:
           cat > "$CODEX_CI_HOME/config.toml" <<'EOF'
           [features]
           network_proxy = true
- 
+
           [permissions.issue-analysis]
           extends = ":workspace"
- 
+
           [permissions.issue-analysis.network]
           enabled = true
- 
+
           [permissions.issue-analysis.network.domains]
           "api.github.com" = "allow"
           EOF
@@ -52,7 +52,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         with:
           openai-api-key: ${{ secrets.OPENAI_API_KEY }}
-          codex-home: ${{ runner.temp }}/codex-issue-analysis
+          codex-home: ${{ runner.temp }}/codex-Code-Review
           permission-profile: issue-analysis
           model: 'gpt-5.6-luna'
           prompt: |
@@ -66,6 +66,6 @@ jobs:
             - Security concerns
             - Test coverage
 
-            Use the repository's CLAUDE.md for guidance on style and conventions. Be constructive and helpful in your feedback.
+            Use the repository's AGENTS.md for guidance on style and conventions. Be constructive and helpful in your feedback.
 
             Use `gh pr comment` with your Bash tool to leave your review as a comment on the PR.
