@@ -18,7 +18,7 @@ jobs:
     #   github.event.pull_request.user.login == 'new-developer' ||
     #   github.event.pull_request.author_association == 'FIRST_TIME_CONTRIBUTOR'
 
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     permissions:
       contents: read
       pull-requests: read
@@ -33,7 +33,7 @@ jobs:
           
       - name: Configure Codex GitHub API access
         env:
-          CODEX_CI_HOME: ${{ runner.temp }}/codex-issue-analysis
+          CODEX_CI_HOME: ${{ runner.temp }}/codex-Code-Review
         run: |
           mkdir -p "$CODEX_CI_HOME"
           cat > "$CODEX_CI_HOME/config.toml" <<'EOF'
