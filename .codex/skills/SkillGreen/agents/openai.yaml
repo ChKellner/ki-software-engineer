@@ -1,0 +1,3 @@
+interface:
+  display_name: 'SkillGreen'
+  short_description: 'Fehlschlagende Tests durch Produktionscode erfüllen'

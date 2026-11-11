@@ -1,0 +1,3 @@
+interface:
+  display_name: 'CreateInitialTest'
+  short_description: 'Unit- und UI-Tests vor der Implementierung erstellen'

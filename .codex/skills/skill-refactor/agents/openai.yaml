@@ -1,0 +1,3 @@
+interface:
+  display_name: 'SkillRefactor'
+  short_description: 'Tests kritisch prüfen und nach Grün refaktorieren'

@@ -1,0 +1,3 @@
+interface:
+  display_name: 'Requirements Finalisation'
+  short_description: 'Verify feature delivery and close its GitHub issue'
