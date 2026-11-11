@@ -5,12 +5,14 @@ on:
      types: [labeled]
  
 jobs:
-  analyze-issue:
-    runs-on: ubuntu-24.04
-    timeout-minutes: 10
-    permissions:
-      contents: read
-      issues: write
+   prepare-implementation:
+     if: github.event.label.name == 'ready-for-implementation'
+     runs-on: ubuntu-24.04
+     timeout-minutes: 15
+     permissions:
+         contents: write
+         issues: write
+         pull-requests: write
  
     steps:
       - name: Checkout repository
@@ -36,18 +38,19 @@ jobs:
           [permissions.issue-analysis.network.domains]
           "api.github.com" = "allow"
           EOF
- 
-      - name: Analyze Issue with OpenAI
-        uses: openai/codex-action@v1
+
+      - name: Prepare Feature Branch
+        id: prepare-branch
+        run: |
+            /ci-se-green
+                               
+            ISSUE_NUMBER=${{ github.event.issue.number }}
+            ISSUE_TITLE="${{ github.event.issue.title }}"
+               
+                              # Convert to lowercase and replace spaces with hyphens, format: feature/{number}-{title}
+            BRANCH_NAME=$(echo "feature/${ISSUE_NUMBER}-${ISSUE_TITLE}" | tr '[:upper:]' '[:lower:]' | sed 's/ /-/g' | sed 's/[^a-z0-9\-\/]//g')
+
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
         env:
-          GH_TOKEN: ${{ github.token }}
-        with:
-          openai-api-key: ${{ secrets.OPENAI_API_KEY }}
-          codex-home: ${{ runner.temp }}/codex-issue-analysis
-          permission-profile: issue-analysis
-          model: 'gpt-5.6-luna'
-          prompt: |
-            /ci-re-review
-                         
-            REPOSITORY: ${{ github.repository }}
-            ISSUE_NUMBER: ${{ github.event.issue.number || github.event.comment.issue_url }}
+            GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
