@@ -57,7 +57,7 @@ jobs:
         uses: openai/codex-action@v1
         env:
           GH_TOKEN: ${{ github.token }}
-            with:
+        with:
           openai-api-key: ${{ secrets.OPENAI_API_KEY }}
           codex-home: ${{ runner.temp }}/codex-issue-analysis
           permission-profile: issue-analysis
