@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
 
-const book = 
+const book  
   id: '1',
   title: 'Angular in Practice',
   subtitle: 'Building useful apps',
