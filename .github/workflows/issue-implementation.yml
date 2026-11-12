@@ -4,7 +4,7 @@ on:
   issues:
     types: [labeled]
 
-
+jobs:
   prepare-implementation:
     if: github.event.label.name == 'ready-for-implementation'
     runs-on: ubuntu-24.04
