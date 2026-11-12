@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
 
-const book
+const book = {
   id: '1',
   title: 'Angular in Practice',
   subtitle: 'Building useful apps',
@@ -102,7 +102,7 @@ for (const failure of ['server', 'network']) {
     await expect(page.getByRole('heading', { name: book.title, exact: true })).toBeVisible();
     await expect(page.getByRole('alert')).toHaveCount(0);
   });
-}
+
 
 test('discards an old detail request when the route changes', async ({ page }) => {
   let release!: () => void;
