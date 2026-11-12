@@ -53,8 +53,12 @@ test('cancels obsolete searches and clears immediately', async ({ page }) => {
   await expect(page.getByText('new', { exact: true })).toBeVisible();
   release();
   await expect(page.getByText('Old result')).toHaveCount(0);
-  await input.fill('pending');
-  await page.getByRole('button', { name: 'Clear search' }).click();
+  // Dispatch both actions in one browser task so automation latency cannot exceed the debounce.
+  await input.evaluate(element => {
+    (element as HTMLInputElement).value = 'pending';
+    element.dispatchEvent(new Event('input', { bubbles: true }));
+    document.querySelector<HTMLButtonElement>('button[aria-label="Clear search"]')!.click();
+  });
   await expect(page.getByText('Collection', { exact: true })).toBeVisible();
   await page.waitForTimeout(400);
   expect(terms).not.toContain('pending');
@@ -67,4 +71,27 @@ test('shows a fallback for a broken card cover', async ({ page }) => {
   await page.route('**/broken.png', route => route.abort());
   await page.goto('http://localhost:4200/');
   await expect(page.getByText('No cover available')).toBeVisible();
+});
+
+test('updates card inputs and cover after a search', async ({ page }) => {
+  const cover = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="120" height="160"/%3E';
+  await page.route(`${api}*`, route => {
+    const searching = new URL(route.request().url()).searchParams.has('q');
+    return route.fulfill({
+      json: [
+        {
+          ...book,
+          title: searching ? 'Updated result' : book.title,
+          cover: searching ? cover : 'http://localhost:4730/broken.png'
+        }
+      ]
+    });
+  });
+  await page.route('**/broken.png', route => route.abort());
+  await page.goto('http://localhost:4200/');
+  await expect(page.getByText('No cover available')).toBeVisible();
+  await page.getByLabel('Search for books').fill('updated');
+  await expect(page.getByRole('link', { name: 'View details for Updated result' })).toBeVisible();
+  await expect(page.getByRole('img', { name: 'Updated result' })).toBeVisible();
+  await expect(page.getByText('No cover available')).toHaveCount(0);
 });

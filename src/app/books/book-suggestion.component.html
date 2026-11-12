@@ -8,43 +8,51 @@
   <h1 class="mt-6 text-3xl font-bold text-blue-700">Suggest a book</h1>
   <p class="mt-4 text-gray-700">Submit a title and author for review before the book joins the collection.</p>
 
-  <form *ngIf="state !== 'submitted'" #form="ngForm" ngNativeValidate (ngSubmit)="submit(form)" class="mt-8 space-y-6">
-    <fieldset [disabled]="state === 'submitting'" class="space-y-6">
-      <legend class="sr-only">Book suggestion</legend>
-      <div>
-        <label for="suggestion-title" class="block font-medium">Title</label>
-        <input
-          id="suggestion-title"
-          name="title"
-          type="text"
-          required
-          [(ngModel)]="suggestion.title"
-          class="mt-2 w-full rounded-md border border-gray-400 px-3 py-2 focus-visible:outline-2 focus-visible:outline-blue-700"
-        />
-      </div>
-      <div>
-        <label for="suggestion-author" class="block font-medium">Author</label>
-        <input
-          id="suggestion-author"
-          name="author"
-          type="text"
-          required
-          [(ngModel)]="suggestion.author"
-          class="mt-2 w-full rounded-md border border-gray-400 px-3 py-2 focus-visible:outline-2 focus-visible:outline-blue-700"
-        />
-      </div>
-      <button
-        type="submit"
-        class="rounded-md bg-blue-700 px-4 py-2 text-white disabled:opacity-60 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700"
-      >
-        Submit suggestion
-      </button>
-    </fieldset>
-  </form>
+  @if (state() !== 'submitted') {
+    <form [formGroup]="form" ngNativeValidate (ngSubmit)="submit()" class="mt-8 space-y-6">
+      <fieldset [disabled]="state() === 'submitting'" class="space-y-6">
+        <legend class="sr-only">Book suggestion</legend>
+        <div>
+          <label for="suggestion-title" class="block font-medium">Title</label>
+          <input
+            id="suggestion-title"
+            name="title"
+            type="text"
+            required
+            formControlName="title"
+            class="mt-2 w-full rounded-md border border-gray-400 px-3 py-2 focus-visible:outline-2 focus-visible:outline-blue-700"
+          />
+        </div>
+        <div>
+          <label for="suggestion-author" class="block font-medium">Author</label>
+          <input
+            id="suggestion-author"
+            name="author"
+            type="text"
+            required
+            formControlName="author"
+            class="mt-2 w-full rounded-md border border-gray-400 px-3 py-2 focus-visible:outline-2 focus-visible:outline-blue-700"
+          />
+        </div>
+        <button
+          type="submit"
+          class="rounded-md bg-blue-700 px-4 py-2 text-white disabled:opacity-60 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700"
+        >
+          Submit suggestion
+        </button>
+      </fieldset>
+    </form>
+  }
 
-  <p *ngIf="state === 'submitting'" role="status" class="mt-6">Submitting suggestion...</p>
-  <p *ngIf="state === 'submitted'" role="status" class="mt-6 text-green-800">Suggestion submitted for review.</p>
-  <p *ngIf="state === 'error'" role="alert" class="mt-6 text-red-800">
-    Unable to submit suggestion. Please try again. Your entries have been preserved.
-  </p>
+  @if (state() === 'submitting') {
+    <p role="status" class="mt-6">Submitting suggestion...</p>
+  }
+  @if (state() === 'submitted') {
+    <p role="status" class="mt-6 text-green-800">Suggestion submitted for review.</p>
+  }
+  @if (state() === 'error') {
+    <p role="alert" class="mt-6 text-red-800">
+      Unable to submit suggestion. Please try again. Your entries have been preserved.
+    </p>
+  }
 </div>

@@ -1,4 +1,4 @@
-import { ErrorHandler, Injectable } from '@angular/core';
+import { ErrorHandler, Injectable, inject } from '@angular/core';
 @Injectable({ providedIn: 'root' })
 export class ErrorReportingService {
   report(error: unknown): void {
@@ -7,7 +7,7 @@ export class ErrorReportingService {
 }
 @Injectable()
 export class GlobalErrorHandler implements ErrorHandler {
-  constructor(private errors: ErrorReportingService) {}
+  private readonly errors = inject(ErrorReportingService);
   handleError(error: unknown): void {
     this.errors.report(error);
   }

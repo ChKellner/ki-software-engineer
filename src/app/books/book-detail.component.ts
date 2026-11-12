@@ -1,8 +1,7 @@
-import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, DestroyRef, OnInit, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, OnInit, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { ActivatedRoute, RouterModule } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { catchError, combineLatest, distinctUntilChanged, map, of, Subject, startWith, switchMap } from 'rxjs';
 import { ErrorReportingService } from '../shared/error-reporting.service';
 import { Book } from './book';
@@ -16,20 +15,18 @@ type BookDetailState =
   | { status: 'error' };
 
 @Component({
+  changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-book-detail',
-  standalone: true,
-  imports: [CommonModule, RouterModule, BookCoverComponent],
+  imports: [RouterLink, BookCoverComponent],
   templateUrl: './book-detail.component.html'
 })
 export class BookDetailComponent implements OnInit {
-  state: BookDetailState = { status: 'loading' };
+  readonly state = signal<BookDetailState>({ status: 'loading' });
   private readonly destroyRef = inject(DestroyRef);
   private readonly retryRequests = new Subject<void>();
-  constructor(
-    private route: ActivatedRoute,
-    private bookApiClient: BookApiClient,
-    private errors: ErrorReportingService
-  ) {}
+  private readonly route = inject(ActivatedRoute);
+  private readonly bookApiClient = inject(BookApiClient);
+  private readonly errors = inject(ErrorReportingService);
   ngOnInit(): void {
     combineLatest([
       this.route.paramMap.pipe(
@@ -55,7 +52,7 @@ export class BookDetailComponent implements OnInit {
         ),
         takeUntilDestroyed(this.destroyRef)
       )
-      .subscribe(state => (this.state = state));
+      .subscribe(state => this.state.set(state));
   }
   retry(): void {
     this.retryRequests.next();

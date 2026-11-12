@@ -1,7 +1,6 @@
-import { CommonModule } from '@angular/common';
-import { Component, DestroyRef, Input, OnInit, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, OnInit, inject, signal, input } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { FormsModule } from '@angular/forms';
+import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { catchError, distinctUntilChanged, map, merge, of, Subject, startWith, switchMap, timer } from 'rxjs';
 import { ErrorReportingService } from '../shared/error-reporting.service';
@@ -11,30 +10,27 @@ import { BookItemComponent } from './book-item.component';
 
 type BookListState = { status: 'loading' } | { status: 'loaded'; books: Book[] } | { status: 'error' };
 @Component({
+  changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-book-list',
-  standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink, BookItemComponent],
+  imports: [ReactiveFormsModule, RouterLink, BookItemComponent],
   templateUrl: './book-list.component.html'
 })
 export class BookListComponent implements OnInit {
-  @Input() pageSize = 10;
-  state: BookListState = { status: 'loading' };
-  searchTerm = '';
+  readonly pageSize = input(10);
+  readonly state = signal<BookListState>({ status: 'loading' });
+  readonly search = new FormControl('', { nonNullable: true });
   private readonly destroyRef = inject(DestroyRef);
-  private readonly searches = new Subject<string>();
   private readonly retries = new Subject<void>();
-  constructor(
-    private bookApiClient: BookApiClient,
-    private errors: ErrorReportingService
-  ) {}
+  private readonly bookApiClient = inject(BookApiClient);
+  private readonly errors = inject(ErrorReportingService);
   ngOnInit(): void {
-    const terms = this.searches.pipe(startWith(''), distinctUntilChanged());
-    merge(terms, this.retries.pipe(map(() => this.searchTerm)))
+    const terms = this.search.valueChanges.pipe(startWith(this.search.value), distinctUntilChanged());
+    merge(terms, this.retries.pipe(map(() => this.search.value)))
       .pipe(
         switchMap(term =>
           (term ? timer(300) : of(0)).pipe(
             switchMap(() =>
-              this.bookApiClient.getBooks(this.pageSize, term).pipe(
+              this.bookApiClient.getBooks(this.pageSize(), term).pipe(
                 map((books): BookListState => ({ status: 'loaded', books })),
                 catchError((error: unknown) => {
                   this.errors.report(error);
@@ -47,19 +43,12 @@ export class BookListComponent implements OnInit {
         ),
         takeUntilDestroyed(this.destroyRef)
       )
-      .subscribe(state => (this.state = state));
-  }
-  onSearchChange(): void {
-    this.searches.next(this.searchTerm);
+      .subscribe(state => this.state.set(state));
   }
   clearSearch(): void {
-    this.searchTerm = '';
-    this.searches.next('');
+    this.search.setValue('');
   }
   retry(): void {
     this.retries.next();
-  }
-  trackById(index: number, book: Book): string {
-    return book.id;
   }
 }

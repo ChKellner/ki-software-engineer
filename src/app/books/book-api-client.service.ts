@@ -1,5 +1,5 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Inject, Injectable, InjectionToken } from '@angular/core';
+import { inject, Injectable, InjectionToken } from '@angular/core';
 import { Observable } from 'rxjs';
 import { Book } from './book';
 
@@ -15,16 +15,10 @@ export interface BookSuggestion {
 
 @Injectable({ providedIn: 'root' })
 export class BookApiClient {
-  private readonly apiUrl: string;
-  private readonly suggestionsUrl: string;
-
-  constructor(
-    private http: HttpClient,
-    @Inject(BOOK_API_BASE_URL) baseUrl: string
-  ) {
-    this.apiUrl = `${baseUrl.replace(/\/$/, '')}/books`;
-    this.suggestionsUrl = `${baseUrl.replace(/\/$/, '')}/book-suggestions`;
-  }
+  private readonly http = inject(HttpClient);
+  private readonly baseUrl = inject(BOOK_API_BASE_URL).replace(/\/$/, '');
+  private readonly apiUrl = `${this.baseUrl}/books`;
+  private readonly suggestionsUrl = `${this.baseUrl}/book-suggestions`;
 
   getBooks(pageSize: number = 10, searchTerm?: string): Observable<Book[]> {
     let params = new HttpParams().set('_limit', pageSize.toString());

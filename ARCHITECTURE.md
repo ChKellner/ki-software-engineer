@@ -101,3 +101,16 @@ keine Backend-Implementierung oder Prüfung von Vorschlägen.
 - `npx playwright test` startet den Entwicklungsserver und testet die Anwendung mit abgefangenen API-Anfragen. Die Konfiguration sieht Chromium, Firefox und WebKit vor.
 - Das Karma-Ziel enth?lt derzeit keine Anwendungstests; Karma- und Jasmine-Abh?ngigkeiten sind nicht deklariert.
 - Deployment, Backend und Infrastruktur sind nicht Bestandteil dieses Repositorys.
+
+## 6. Angular modernization
+
+The application remains on Angular 20 and keeps Zone-based change detection. All components use
+OnPush; local request states and component inputs use signals. Templates use built-in control flow
+and track list entries by book ID. Services use `inject()`, and each feature route loads its component
+lazily. The API client remains the only HTTP boundary.
+
+Search and suggestions use typed, non-nullable reactive forms. Search retains its 300 ms debounce,
+immediate clearing, and cancellation of obsolete requests. Suggestions disable both their form model
+and fieldset during submission, retain values after failure, and cancel requests when destroyed.
+The cover component resets its failure signal whenever its source changes. Covers are dynamic API
+images (including data URLs), so they retain native image bindings.

@@ -1,70 +1,76 @@
+@let view = state();
 <div class="container mx-auto px-4 py-12 max-w-5xl break-words">
   <a routerLink="/" class="inline-flex items-center text-blue-700 hover:text-blue-900 font-medium mb-8"
     >&larr; Back to books</a
   >
 
-  <div *ngIf="state.status === 'loading'" role="status" class="text-center py-20 text-gray-600">
-    Loading book details...
-  </div>
+  @if (view.status === 'loading') {
+    <div role="status" class="text-center py-20 text-gray-600">Loading book details...</div>
+  }
 
-  <section
-    *ngIf="state.status === 'loaded'"
-    aria-labelledby="book-title"
-    class="bg-white rounded-xl shadow-lg overflow-hidden md:flex"
-  >
-    <div class="md:w-2/5 bg-gray-100 min-h-96 flex items-center justify-center p-8">
-      <app-book-cover
-        [src]="state.book.cover"
-        [alt]="state.book.title"
-        imageClass="max-h-[32rem] w-full object-contain"
-        class="w-full"
-      ></app-book-cover>
-    </div>
-    <div class="p-8 md:w-3/5">
-      <p class="text-sm uppercase tracking-wide text-blue-700 font-semibold">Book details</p>
-      <h1 id="book-title" class="text-3xl font-bold text-gray-900 mt-2">{{ state.book.title }}</h1>
-      <p *ngIf="state.book.subtitle" class="text-lg text-gray-600 mt-2">{{ state.book.subtitle }}</p>
-      <p class="text-xl text-blue-800 mt-6">{{ state.book.author }}</p>
+  @if (view.status === 'loaded') {
+    <section aria-labelledby="book-title" class="bg-white rounded-xl shadow-lg overflow-hidden md:flex">
+      <div class="md:w-2/5 bg-gray-100 min-h-96 flex items-center justify-center p-8">
+        <app-book-cover
+          [src]="view.book.cover"
+          [alt]="view.book.title"
+          imageClass="max-h-[32rem] w-full object-contain"
+          class="w-full"
+        ></app-book-cover>
+      </div>
+      <div class="p-8 md:w-3/5">
+        <p class="text-sm uppercase tracking-wide text-blue-700 font-semibold">Book details</p>
+        <h1 id="book-title" class="text-3xl font-bold text-gray-900 mt-2">{{ view.book.title }}</h1>
+        @if (view.book.subtitle) {
+          <p class="text-lg text-gray-600 mt-2">{{ view.book.subtitle }}</p>
+        }
+        <p class="text-xl text-blue-800 mt-6">{{ view.book.author }}</p>
+        @if (view.book.abstract) {
+          <p class="text-gray-700 leading-relaxed mt-8">
+            {{ view.book.abstract }}
+          </p>
+        } @else {
+          <p class="text-gray-500 italic mt-8">No description available.</p>
+        }
+        <dl class="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-4 mt-8 border-t pt-6 text-sm">
+          <div>
+            <dt class="text-gray-500">Publisher</dt>
+            <dd class="font-medium text-gray-900">{{ view.book.publisher || 'Not available' }}</dd>
+          </div>
+          <div>
+            <dt class="text-gray-500">Pages</dt>
+            <dd class="font-medium text-gray-900">{{ view.book.numPages }}</dd>
+          </div>
+          <div>
+            <dt class="text-gray-500">ISBN</dt>
+            <dd class="font-medium text-gray-900">{{ view.book.isbn || 'Not available' }}</dd>
+          </div>
+          <div>
+            <dt class="text-gray-500">Price</dt>
+            <dd class="font-medium text-gray-900">{{ view.book.price || 'Not available' }}</dd>
+          </div>
+        </dl>
+      </div>
+    </section>
+  }
 
-      <p *ngIf="state.book.abstract; else noDescription" class="text-gray-700 leading-relaxed mt-8">
-        {{ state.book.abstract }}
-      </p>
-      <ng-template #noDescription><p class="text-gray-500 italic mt-8">No description available.</p></ng-template>
-
-      <dl class="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-4 mt-8 border-t pt-6 text-sm">
-        <div>
-          <dt class="text-gray-500">Publisher</dt>
-          <dd class="font-medium text-gray-900">{{ state.book.publisher || 'Not available' }}</dd>
-        </div>
-        <div>
-          <dt class="text-gray-500">Pages</dt>
-          <dd class="font-medium text-gray-900">{{ state.book.numPages }}</dd>
-        </div>
-        <div>
-          <dt class="text-gray-500">ISBN</dt>
-          <dd class="font-medium text-gray-900">{{ state.book.isbn || 'Not available' }}</dd>
-        </div>
-        <div>
-          <dt class="text-gray-500">Price</dt>
-          <dd class="font-medium text-gray-900">{{ state.book.price || 'Not available' }}</dd>
-        </div>
-      </dl>
-    </div>
-  </section>
-
-  <section *ngIf="state.status === 'not-found'" class="text-center py-20">
-    <h1 class="text-2xl font-semibold text-gray-800">Book not found</h1>
-    <a routerLink="/" class="inline-block mt-4 text-blue-700 hover:underline">Return to the collection</a>
-  </section>
-  <section *ngIf="state.status === 'error'" role="alert" class="text-center py-20">
-    <h1 class="text-2xl font-semibold text-gray-800">Unable to load book details</h1>
-    <p class="mt-4 text-gray-600">Please try again.</p>
-    <button
-      type="button"
-      (click)="retry()"
-      class="mt-4 rounded-md bg-blue-700 px-4 py-2 text-white hover:bg-blue-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700"
-    >
-      Retry
-    </button>
-  </section>
+  @if (view.status === 'not-found') {
+    <section class="text-center py-20">
+      <h1 class="text-2xl font-semibold text-gray-800">Book not found</h1>
+      <a routerLink="/" class="inline-block mt-4 text-blue-700 hover:underline">Return to the collection</a>
+    </section>
+  }
+  @if (view.status === 'error') {
+    <section role="alert" class="text-center py-20">
+      <h1 class="text-2xl font-semibold text-gray-800">Unable to load book details</h1>
+      <p class="mt-4 text-gray-600">Please try again.</p>
+      <button
+        type="button"
+        (click)="retry()"
+        class="mt-4 rounded-md bg-blue-700 px-4 py-2 text-white hover:bg-blue-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700"
+      >
+        Retry
+      </button>
+    </section>
+  }
 </div>
